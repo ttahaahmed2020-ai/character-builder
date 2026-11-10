@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f6f7fb">
+<title>استوديو بناء الشخصية</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:var(--tg-theme-bg-color,#f6f7fb);--card:var(--tg-theme-secondary-bg-color,#fff);--fg:var(--tg-theme-text-color,#202435);--muted:var(--tg-theme-hint-color,#697386);--accent:var(--tg-theme-button-color,#5267d8);--accentText:var(--tg-theme-button-text-color,#fff);--line:rgba(120,130,150,.22);--field:var(--tg-theme-bg-color,#f8f9fc)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.55}.wrap{max-width:760px;margin:auto;padding:16px 14px 40px}.hero{padding:18px;border-radius:18px;background:linear-gradient(135deg,#514fc7,#8c67d9);color:#fff;margin-bottom:16px}.hero h1{font-size:22px;margin:0 0 6px}.hero p{font-size:14px;margin:0;opacity:.94}.progress{height:7px;background:rgba(255,255,255,.3);border-radius:20px;margin-top:14px;overflow:hidden}.bar{height:100%;width:0;background:#fff;transition:width .2s}.section{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;margin:12px 0}.section h2{font-size:17px;margin:0 0 12px}.field{margin:12px 0}.field label{display:block;font-size:14px;font-weight:650;margin-bottom:6px}.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;background:var(--field);color:var(--fg);font:inherit;font-size:14px;min-height:46px}.hint{font-size:12px;color:var(--muted);margin-top:5px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0}.btn{border:0;border-radius:12px;padding:13px 10px;font:inherit;font-weight:700;background:var(--accent);color:var(--accentText);min-height:46px}.btn.secondary{background:var(--card);color:var(--fg);border:1px solid var(--line)}.result{display:none;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:16px}.result h2{font-size:18px;margin:0 0 10px}.result h3{font-size:15px;margin:15px 0 7px}.output{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:12px;font-size:13px;direction:auto}.notice{font-size:12px;color:var(--muted);text-align:center;margin:18px 0}.tag{display:inline-block;background:rgba(120,130,150,.13);padding:3px 8px;border-radius:20px;font-size:11px;margin-inline-start:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header class="hero"><h1>استوديو بناء الشخصية</h1><p>اختر تفاصيل شخصيتك، ثم أنشئ بطاقة مواصفات وبرومبت إنجليزي جاهزاً لتوليد الصورة المرجعية.</p><div class="progress"><div class="bar" id="bar"></div></div></header>
+ <div id="form"></div>
+ <div class="actions"><button class="btn" id="create">إنشاء المواصفات والبرومبت</button><button class="btn secondary" id="reset">مسح الاختيارات</button></div>
+ <section class="result" id="result"><h2>نتيجة تصميم الشخصية <span class="tag">جاهزة للنسخ</span></h2><h3>بطاقة المواصفات بالعربية</h3><div class="output" id="arabicOut"></div><div class="actions"><button class="btn" id="copyArabic">نسخ البطاقة العربية</button></div><h3>English image-generation prompt</h3><div class="output" id="englishOut" dir="ltr"></div><div class="actions"><button class="btn" id="copyEnglish">نسخ البرومبت الإنجليزي</button></div><p class="hint">ملاحظة: الخانات المتروكة دون اختيار لن تُضاف إلى النتيجة. اختر «لا ينطبق» عندما لا تناسب الخاصية نوع الشخصية.</p></section>
+ <p class="notice">يعمل التمرين داخل Telegram Mini App. لا تُرسل اختياراتك إلى خادم خارجي.</p>
+</div>
+<script>
+(function(){
+ const tg=window.Telegram&&window.Telegram.WebApp; if(tg){tg.ready();tg.expand();}
+ const groups=[
+ {title:'1. هوية الشخصية',fields:[
+  ['kind','نوع الشخصية',['ولد أو بنت كرتوني','شخصية حيوان','روبوت','Stickman / رجل عصا','شخصية خيالية','شخصية هندسية أو رمزية','شخصية تعليمية / وايت بورد','شخصية واقعية بأسلوب مبسط']],
+  ['role','الدور أو الوظيفة',['طفل مستكشف','معلّم أو مرشد','بطل القصة','صديق مرح','مساعد آلي','حيوان ناطق','شخصية كوميدية','لا أريد تحديد دور']],
+  ['audience','الجمهور المستهدف',['أطفال 3–5 سنوات','أطفال 6–9 سنوات','أطفال 10–12 سنة','عائلة / جميع الأعمار','جمهور عام']]]},
+ {title:'2. أسلوب الرسم والتصميم',fields:[
+  ['style','النمط البصري',['3D كرتوني سينمائي','2D كرتوني','Anime','Pixar-inspired family animation look','Claymation / صلصال','Stickman بسيط','Whiteboard مرسوم يدوياً','Low-poly 3D','واقعي مبسط','Vector / تصميم مسطح']],
+  ['artMood','المزاج الفني',['مرح ومشرق','لطيف وهادئ','مغامرات وحيوية','سحري وخيالي','تعليمي وواضح','سينمائي وملحمي']],
+  ['detailLevel','مستوى التفاصيل',['بسيط ونظيف','متوسط التفاصيل','غني بالتفاصيل الدقيقة']]]},
+ {title:'3. الجسم والنسب',fields:[
+  ['body','بنية الجسم',['جسم طفل كرتوني','جسم حيوان','جسم روبوت','جسم عصا بسيط','جسم هندسي','لا ينطبق']],
+  ['proportions','النسب',['رأس كبير وجسم صغير','نسب كرتونية متوازنة','رأس وجسم مبالغ فيهما','نسب قريبة من الواقع','لا ينطبق']],
+  ['height','الطول الظاهري',['قصير','متوسط','طويل','صغير جداً / Mini','لا ينطبق']]]},
+ {title:'4. الرأس والوجه',fields:[
+  ['head','شكل الرأس',['دائري','بيضاوي','مربع بحواف ناعمة','كبير ومستدير','رأس حيوان','رأس آلي','لا ينطبق']],
+  ['face','ملامح الوجه',['وجه طفولي ناعم','وجه مرح وودود','وجه بسيط جداً','وجه بتفاصيل واضحة','لا يوجد وجه بشري']],
+  ['eyes','شكل العينين',['كبيرتان ومستديرتان','واسعتان ولامعتان','صغيرتان وبسيطتان','عينان هندسيتان / LED','لا ينطبق']],
+  ['eyeColor','لون العينين',['بني','أزرق','أخضر','عسلي','أسود','ألوان مضيئة','لا ينطبق']],
+  ['noseMouth','الأنف والفم',['أنف صغير وفم مبتسم','أنف بسيط وفم واضح','فم صغير مبتسم','فم مرسوم بخط بسيط','لا ينطبق']]]},
+ {title:'5. الشعر أو الفرو أو الغطاء',fields:[
+  ['hair','اللون أو النوع',['شعر بني','شعر أسود','شعر أشقر','شعر أحمر','فرو ناعم','سطح معدني بلا شعر','لا ينطبق']],
+  ['hairStyle','التسريحة أو الشكل',['شعر قصير مرتب','شعر متموج ومنفوش','شعر مجعد','شعر طويل','عرف حيوان','قرون أو أشواك','غطاء رأس','لا ينطبق']]]},
+ {title:'6. الألوان والهوية البصرية',fields:[
+  ['colors','لوحة الألوان',['ألوان زاهية ومبهجة','ألوان دافئة','ألوان باستيل ناعمة','ألوان أساسية واضحة','ألوان معدنية مستقبلية','ألوان طبيعية هادئة']],
+  ['mainColor','اللون الرئيسي',['أحمر','أزرق','أخضر','أصفر','بنفسجي','برتقالي','وردي','أسود وأبيض','مزيج ألوان']]]},
+ {title:'7. الملابس والإكسسوارات',fields:[
+  ['clothes','الملابس',['هودي وقميص وبنطال','ملابس طفل يومية','زيّ مغامر','زيّ معلّم','بدلة روبوت','ملابس خيالية','لا توجد ملابس']],
+  ['accessories','الإكسسوارات',['حقيبة ظهر','قبعة','نظارات','ساعة أو سوار','شارة أو شعار صغير','أداة أو لعبة بيده','بدون إكسسوارات']]]},
+ {title:'8. الخامات والملمس',fields:[
+  ['materials','الخامات',['ناعمة وحريرية','قماش قطني واضح','بلاستيك مطفي ناعم','مطاط / Vinyl toy','صلصال','معدن مصقول','فرو ناعم','خامات واقعية دقيقة']],
+  ['surface','معالجة السطح',['مطفي','لامع خفيف','لامع واضح','ملمس ناعم جداً','تفاصيل سطح دقيقة']]]},
+ {title:'9. الإضاءة',fields:[
+  ['lighting','نوع الإضاءة',['إضاءة سينمائية ناعمة ودافئة','ضوء نهاري منتشر','إضاءة استوديو متوازنة','إضاءة خلفية ذهبية','إضاءة ملونة سحرية','إضاءة درامية خفيفة']],
+  ['shadows','الظلال',['ظلال ناعمة','ظلال خفيفة جداً','ظلال سينمائية واضحة','بدون ظلال قوية']]]},
+ {title:'10. الخلفية والبيئة',fields:[
+  ['background','الخلفية',['خلفية بيضاء نظيفة','خلفية خضراء كروما','استوديو بسيط','غرفة أطفال','مزرعة ملونة','غابة خيالية','مدينة كرتونية','خلفية شفافة إن أمكن']],
+  ['environment','تفاصيل البيئة',['بدون عناصر إضافية','عناصر قليلة غير مزدحمة','بيئة غنية بالتفاصيل','خلفية ضبابية ناعمة']]]},
+ {title:'11. التعبير والمشاعر',fields:[
+  ['expression','تعبير الوجه',['ابتسامة ودودة','ضحكة سعيدة','دهشة لطيفة','فضول وتركيز','ثقة وحماس','هدوء وطمأنينة','تعبير محايد','لا ينطبق']]]},
+ {title:'12. الحركة والوضعية',fields:[
+  ['pose','الوضعية المرجعية',['وقوف مستقيم مع إظهار الجسم كاملاً','وقوف مع تلويح باليد','وضعية بطل واثق','جلوس مريح','حركة قفز مرحة','وضعية محايدة سهلة التحريك']],
+  ['motion','طابع الحركة المستقبلي',['حركات مرنة وناعمة','حركات كرتونية مبالغ فيها','حركة بسيطة وهادئة','حركة آلية دقيقة','غير مطلوب للصورة الثابتة']]]},
+ {title:'13. الصوت وطريقة الكلام (اختياري)',fields:[
+  ['voice','نوع الصوت المقترح',['صوت طفل مرح','صوت طفل هادئ','صوت كرتوني لطيف','صوت روبوت','صوت حيوان كرتوني','لا ينطبق / أقرر لاحقاً']],
+  ['speech','طريقة الكلام',['العربية الفصحى المبسطة','لهجة عربية محكية','كلمات قصيرة وواضحة','بدون كلام']]]},
+ {title:'14. الكاميرا والتكوين',fields:[
+  ['camera','زاوية الكاميرا',['أمامية مباشرة','زاوية ثلاثة أرباع','جانبية','من مستوى عين الشخصية','لقطة كاملة للجسم','لقطة متوسطة']],
+  ['composition','التكوين والمقاس',['الشخصية في المنتصف مع فراغ حولها','صورة مرجعية كاملة الجسم','ورقة تصميم شخصية متعددة الزوايا','عمودي 9:16','مربع 1:1','أفقي 16:9']]]},
+ {title:'15. ثبات الشخصية والمرجع البصري',fields:[
+  ['consistency','ثبات الهوية',['الحفاظ على نفس الوجه والملابس والألوان في كل المشاهد','الحفاظ على النسب والملامح فقط','تصميم مرن قابل للتغيير']],
+  ['reference','نوع الصورة المرجعية',['صورة واحدة أمامية كاملة الجسم','أمام وجانب وخلف','ورقة تعابير وجه متعددة','ورقة وضعيات متعددة','مرجع شامل للشخصية']]]}
+ ];
+ const form=document.getElementById('form'); const values={}; let total=0;
+ groups.forEach((g,gi)=>{const sec=document.createElement('section');sec.className='section';const h=document.createElement('h2');h.textContent=g.title;sec.appendChild(h);g.fields.forEach(([key,label,opts])=>{total++;const wrap=document.createElement('div');wrap.className='field';const lab=document.createElement('label');lab.htmlFor=key;lab.textContent=label;const sel=document.createElement('select');sel.id=key;sel.dataset.key=key;const first=document.createElement('option');first.value='';first.textContent='— اختر من القائمة —';sel.appendChild(first);opts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o)});sel.addEventListener('change',()=>{values[key]=sel.value;updateProgress()});wrap.append(lab,sel);sec.appendChild(wrap)});form.appendChild(sec)});
+ function updateProgress(){const done=Object.values(values).filter(Boolean).length;document.getElementById('bar').style.width=(done/total*100)+'%'}
+ const labels={kind:'نوع الشخصية',role:'الدور',audience:'الجمهور',style:'الأسلوب الفني',artMood:'المزاج الفني',detailLevel:'التفاصيل',body:'بنية الجسم',proportions:'النسب',height:'الطول',head:'شكل الرأس',face:'ملامح الوجه',eyes:'العينان',eyeColor:'لون العينين',noseMouth:'الأنف والفم',hair:'الشعر أو الفرو',hairStyle:'التسريحة أو الشكل',colors:'لوحة الألوان',mainColor:'اللون الرئيسي',clothes:'الملابس',accessories:'الإكسسوارات',materials:'الخامات',surface:'السطح',lighting:'الإضاءة',shadows:'الظلال',background:'الخلفية',environment:'البيئة',expression:'التعبير',pose:'الوضعية',motion:'الحركة',voice:'الصوت',speech:'طريقة الكلام',camera:'الكاميرا',composition:'التكوين',consistency:'ثبات الهوية',reference:'المرجع البصري'};
+ function create(){const chosen=Object.entries(values).filter(([k,v])=>v);if(!chosen.length){alert('اختر إجابة واحدة على الأقل قبل الإنشاء.');return}const ar=chosen.map(([k,v])=>'• '+labels[k]+': '+v).join('\n');const en=chosen.map(([k,v])=>labels[k]+': '+v).join('; ');const prompt='Create a polished character reference design based on these specifications. '+en+'. Show the character clearly with a clean, readable composition and consistent visual identity. Preserve the selected design traits, proportions, colors, clothing, materials and expression. Use professional character-design rendering, high visual quality, clean anatomy and uncluttered presentation. Do not add text, labels, watermarks, extra characters or unrequested accessories. If a full-body reference is selected, show the entire character from head to toe.';document.getElementById('arabicOut').textContent=ar;document.getElementById('englishOut').textContent=prompt;document.getElementById('result').style.display='block';document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred('success')}
+ async function copy(id){const text=document.getElementById(id).textContent;try{await navigator.clipboard.writeText(text);alert('تم النسخ بنجاح.')}catch(e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();alert(ok?'تم النسخ بنجاح.':'تعذر النسخ تلقائياً. اضغط مطولاً على النص واختر نسخ.')}}
+ document.getElementById('create').addEventListener('click',create);document.getElementById('copyArabic').addEventListener('click',()=>copy('arabicOut'));document.getElementById('copyEnglish').addEventListener('click',()=>copy('englishOut'));
+ document.getElementById('reset').addEventListener('click',()=>{if(!confirm('هل تريد مسح جميع الاختيارات؟'))return;Object.keys(values).forEach(k=>delete values[k]);document.querySelectorAll('select').forEach(s=>s.value='');document.getElementById('result').style.display='none';updateProgress();window.scrollTo({top:0,behavior:'smooth'})});
+})();
+</script>
+</body></html>
